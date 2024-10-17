@@ -5,6 +5,7 @@ namespace Gvz.Laboratory.UserService.Abstractions
     public interface IUserRepository
     {
         Task<Guid> CreateUserAsync(UserModel userModel);
+        Task<List<UserModel>> GetUsersForPageAsync(int page);
         Task<List<UserModel>> GetAllUsersAsync();
         Task<UserModel> GetUserByEmailAsync(string email);
         Task<Guid> UpdateUserAsync(UserModel userModel);

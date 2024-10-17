@@ -1,7 +1,9 @@
 ﻿using Gvz.Laboratory.UserService.Abstractions;
 using Gvz.Laboratory.UserService.Contracts;
 using Gvz.Laboratory.UserService.Enums;
+using Gvz.Laboratory.UserService.Models;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace Gvz.Laboratory.UserService.Controllers
 {
@@ -23,12 +25,14 @@ namespace Gvz.Laboratory.UserService.Controllers
         {
             var token = await _userService.CreateUserAsync(Guid.NewGuid(),
                                                             UserRole.User,
+                                                            userRegistrationRequest.Surname,
+                                                            userRegistrationRequest.UserName,
+                                                            userRegistrationRequest.Patronymic,
                                                             userRegistrationRequest.Email,
                                                             userRegistrationRequest.Password,
-                                                            userRegistrationRequest.Surname,
-                                                            userRegistrationRequest.Name);
+                                                            userRegistrationRequest.RepeatPassword);
 
-            return new JsonResult(token);
+            return Ok(token);
         }
 
         [HttpPost]
@@ -41,8 +45,15 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpGet]
+        [Route("getUsersForPageAsync")]
+        public async Task<ActionResult> GetUsersForPageAsync(int page)
+        {
+            return Ok(await _userService.GetUsersForPageAsync(page));
+        }
+
+        [HttpGet]
         [Route("getAllUsers")]
-        public async Task<ActionResult> GetAllUsersAsync()
+        public async Task<ActionResult<List<UserModel>>> GetAllUsersAsync()
         {
             return Ok(await _userService.GetAllUsersAsync());
         }
@@ -51,7 +62,7 @@ namespace Gvz.Laboratory.UserService.Controllers
         [Route("updateUser/{id:guid}")]
         public async Task<ActionResult> UpdateUserAsync(Guid id, [FromBody] UpdateUserRequest updateUserRequest)
         {
-            await _userService.UpdateUserAsync(id, updateUserRequest.Surname, updateUserRequest.Name);
+            await _userService.UpdateUserAsync(id, updateUserRequest.Surname, updateUserRequest.Name, updateUserRequest.Patronymic);
             return Ok();
         }
     }

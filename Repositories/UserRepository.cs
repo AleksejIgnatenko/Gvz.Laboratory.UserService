@@ -2,7 +2,6 @@
 using Gvz.Laboratory.UserService.Entities;
 using Gvz.Laboratory.UserService.Exceptions;
 using Gvz.Laboratory.UserService.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gvz.Laboratory.UserService.Repositories
@@ -22,8 +21,6 @@ namespace Gvz.Laboratory.UserService.Repositories
 
         public async Task<Guid> CreateUserAsync(UserModel userModel)
         {
-            _logger.LogInformation("");
-
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email.Equals(userModel.Email));
 
@@ -34,10 +31,11 @@ namespace Gvz.Laboratory.UserService.Repositories
                 {
                     Id = userModel.Id,
                     Role = userModel.Role,
+                    Surname = userModel.Surname,
+                    UserName = userModel.UserName,
+                    Patronymic = userModel.Patronymic,
                     Email = userModel.Email,
                     Password = _passwordHasher.Generate(userModel.Password),
-                    Surname = userModel.Surname,
-                    Name = userModel.Name,
                     DateCreate = DateTime.UtcNow,
                 };
 
@@ -46,6 +44,27 @@ namespace Gvz.Laboratory.UserService.Repositories
 
                 return userEntity.Id;
             }
+        }
+
+        public async Task<List<UserModel>> GetUsersForPageAsync(int page)
+        {
+            var userEntities = await _context.Users
+                .AsNoTracking()
+                .OrderByDescending(u => u.DateCreate) // Переместите OrderBy перед Skip
+                .Skip(page * 10)
+                .Take(10)
+                .ToListAsync();
+
+            var users = userEntities.Select(u => UserModel.Create(u.Id,
+                                            u.Role,
+                                            u.Surname,
+                                            u.UserName,
+                                            u.Patronymic,
+                                            u.Email,
+                                            u.Password,
+                                            false).user).ToList();
+
+            return users;
         }
 
         public async Task<List<UserModel>> GetAllUsersAsync()
@@ -57,10 +76,11 @@ namespace Gvz.Laboratory.UserService.Repositories
 
             var users = userEntities.Select(u => UserModel.Create(u.Id,
                                             u.Role,
+                                            u.Surname,
+                                            u.UserName,
+                                            u.Patronymic,
                                             u.Email,
                                             u.Password,
-                                            u.Surname,
-                                            u.Name,
                                             false).user).ToList();
 
             return users;
@@ -75,10 +95,11 @@ namespace Gvz.Laboratory.UserService.Repositories
 
             var user = UserModel.Create(userEntity.Id,
                 userEntity.Role,
+                userEntity.Surname,
+                userEntity.UserName,
+                userEntity.Patronymic,
                 userEntity.Email,
                 userEntity.Password,
-                userEntity.Surname,
-                userEntity.Name,
                 false).user;
 
             return user;
@@ -91,7 +112,8 @@ namespace Gvz.Laboratory.UserService.Repositories
             if (userEntity == null) { throw new UsersRepositoryException("Пользователя не найден"); }
 
             userEntity.Surname = userModel.Surname;
-            userEntity.Name = userModel.Name;
+            userEntity.UserName = userModel.UserName;
+            userEntity.Patronymic = userModel.Patronymic;
 
             await _context.SaveChangesAsync();
 

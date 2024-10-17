@@ -1,15 +1,14 @@
 ﻿using Gvz.Laboratory.UserService.Exceptions;
+using Serilog;
 using System.Text.Json;
 
 public class ExceptionHandlerMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionHandlerMiddleware> _logger;
 
-    public ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
+    public ExceptionHandlerMiddleware(RequestDelegate next)
     {
         _next = next;
-        _logger = logger;
     }
 
     public async Task Invoke(HttpContext context)
@@ -20,11 +19,7 @@ public class ExceptionHandlerMiddleware
         }
         catch (UserValidationException ex)
         {
-            var requestTime = context.Items["RequestStartTime"] as DateTime? ?? DateTime.Now;
             var statusCode = StatusCodes.Status400BadRequest;
-
-            _logger.LogError($"Response at: {DateTime.Now}, request at: {requestTime}, id request: {context.TraceIdentifier} status code: {statusCode}\n"
-                + string.Join(",\n", ex.Errors.Select(x => x.Key + ": " + x.Value)));
 
             context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
@@ -34,11 +29,7 @@ public class ExceptionHandlerMiddleware
         }
         catch (UsersRepositoryException ex)
         {
-            var requestTime = context.Items["RequestStartTime"] as DateTime? ?? DateTime.Now;
             var statusCode = StatusCodes.Status409Conflict;
-
-            _logger.LogError($"Response at: {DateTime.Now}, request at: {requestTime}, id request: {context.TraceIdentifier} status code: {statusCode}\n"
-                + ex.Message);
 
             context.Response.StatusCode = statusCode;
             context.Response.ContentType = "application/json";
@@ -48,8 +39,7 @@ public class ExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
-
+            Log.Error(ex.Message);
             context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             context.Response.ContentType = "application/json";
 

@@ -3,17 +3,24 @@ using Gvz.Laboratory.UserService.Abstractions;
 using Gvz.Laboratory.UserService.Infrastructure;
 using Gvz.Laboratory.UserService.Repositories;
 using Gvz.Laboratory.UserService.Services;
+using Mapster;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -55,6 +62,15 @@ builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddSingleton(() =>
+{
+    var config = new TypeAdapterConfig();
+
+    new RegisterMapper().Register(config);
+
+    return config;
+});
+builder.Services.AddScoped<IUserMapper, UserMapper>();
 
 var app = builder.Build();
 
@@ -66,7 +82,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
-app.UseMiddleware<LoggingMiddleware>();
 
 app.UseHttpsRedirection();
 

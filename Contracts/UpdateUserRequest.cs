@@ -2,6 +2,7 @@
 {
     public record UpdateUserRequest(
         string Surname,
-        string Name
+        string Name,
+        string Patronymic
         );
 }

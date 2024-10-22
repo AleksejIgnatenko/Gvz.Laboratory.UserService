@@ -1,6 +1,8 @@
+using Confluent.Kafka;
 using Gvz.Laboratory.UserService;
 using Gvz.Laboratory.UserService.Abstractions;
 using Gvz.Laboratory.UserService.Infrastructure;
+using Gvz.Laboratory.UserService.Kafka;
 using Gvz.Laboratory.UserService.Repositories;
 using Gvz.Laboratory.UserService.Services;
 using Mapster;
@@ -62,24 +64,33 @@ builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddSingleton(() =>
 {
     var config = new TypeAdapterConfig();
-
     new RegisterMapper().Register(config);
-
     return config;
 });
 builder.Services.AddScoped<IUserMapper, UserMapper>();
 
+var config = new ProducerConfig
+{
+    BootstrapServers = "kafka:29092"
+};
+builder.Services.AddSingleton<IProducer<Null, string>>(new ProducerBuilder<Null, string>(config).Build());
+builder.Services.AddScoped<IUserKafkaProducer, UserKafkaProducer>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseSwagger();
+//    app.UseSwaggerUI();
+//}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 
@@ -88,5 +99,12 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(x =>
+{
+    x.WithHeaders().AllowAnyHeader();
+    x.WithOrigins("http://localhost:3000");
+    x.WithMethods().AllowAnyMethod();
+});
 
 app.Run();

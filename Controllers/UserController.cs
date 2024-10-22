@@ -23,6 +23,9 @@ namespace Gvz.Laboratory.UserService.Controllers
         [Route("registration")]
         public async Task<ActionResult> UserRegistrationAsync([FromBody] UserRegistrationRequest userRegistrationRequest)
         {
+            Console.WriteLine(userRegistrationRequest.Email);
+            Console.WriteLine(userRegistrationRequest.RepeatPassword);
+
             var token = await _userService.CreateUserAsync(Guid.NewGuid(),
                                                             UserRole.User,
                                                             userRegistrationRequest.Surname,
@@ -32,7 +35,7 @@ namespace Gvz.Laboratory.UserService.Controllers
                                                             userRegistrationRequest.Password,
                                                             userRegistrationRequest.RepeatPassword);
 
-            return Ok(token);
+            return Ok(new { token });
         }
 
         [HttpPost]

@@ -11,13 +11,15 @@ namespace Gvz.Laboratory.UserService.Services
         private readonly IJwtProvider _jwtProvider;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IUserMapper _userMapper;
+        private readonly IUserKafkaProducer _userKafkaProducer;
 
-        public UserService(IUserRepository userRepository, IJwtProvider jwtProvider, IPasswordHasher passwordHasher, IUserMapper userMapper)
+        public UserService(IUserRepository userRepository, IJwtProvider jwtProvider, IPasswordHasher passwordHasher, IUserMapper userMapper, IUserKafkaProducer userKafkaProducer)
         {
             _userRepository = userRepository;
             _jwtProvider = jwtProvider;
             _passwordHasher = passwordHasher;
             _userMapper = userMapper;
+            _userKafkaProducer = userKafkaProducer;
         }
 
         public async Task<string> CreateUserAsync(Guid id, UserRole role, string surname, string userName, string patronymic, 
@@ -31,10 +33,8 @@ namespace Gvz.Laboratory.UserService.Services
 
             await _userRepository.CreateUserAsync(user);
 
-            //var userDto = _userMapper.MapTo(user);
-            //Console.WriteLine(userDto.Surname);
-            //Console.WriteLine(userDto.UserName);
-            //Console.WriteLine(userDto.Patronymic);
+            var userDto = _userMapper.MapTo(user) ?? throw new Exception();
+            await _userKafkaProducer.SendUserToKafka(userDto, "users-topic");
 
             var token = _jwtProvider.GenerateToken(user);
 

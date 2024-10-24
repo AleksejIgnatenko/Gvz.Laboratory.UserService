@@ -58,7 +58,7 @@ namespace Gvz.Laboratory.UserService.Services
             return token;
         }
 
-        public async Task<List<UserModel>> GetUsersForPageAsync(int page)
+        public async Task<(List<UserModel> users, int countUser)> GetUsersForPageAsync(int page)
         {
             return await _userRepository.GetUsersForPageAsync(page);
         }

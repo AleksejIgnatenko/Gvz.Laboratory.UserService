@@ -23,9 +23,6 @@ namespace Gvz.Laboratory.UserService.Controllers
         [Route("registration")]
         public async Task<ActionResult> UserRegistrationAsync([FromBody] UserRegistrationRequest userRegistrationRequest)
         {
-            Console.WriteLine(userRegistrationRequest.Email);
-            Console.WriteLine(userRegistrationRequest.RepeatPassword);
-
             var token = await _userService.CreateUserAsync(Guid.NewGuid(),
                                                             UserRole.User,
                                                             userRegistrationRequest.Surname,
@@ -48,10 +45,22 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpGet]
-        [Route("getUsersForPageAsync")]
+        [Route("getUsersForPage")]
         public async Task<ActionResult> GetUsersForPageAsync(int page)
         {
-            return Ok(await _userService.GetUsersForPageAsync(page));
+            var (users, countUser) = await _userService.GetUsersForPageAsync(page);
+            Console.WriteLine(page);
+            var response = users.Select(u => new GetUsersForPageResponse(
+                u.Id,
+                u.Role,
+                u.Surname,
+                u.UserName,
+                u.Patronymic,
+                u.Email)).ToList();
+
+            var responseWrapper = new GetUsersForPageResponseWrapper(response, countUser);
+
+            return Ok(responseWrapper);
         }
 
         [HttpGet]

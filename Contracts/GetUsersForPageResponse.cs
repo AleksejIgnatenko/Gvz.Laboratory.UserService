@@ -4,7 +4,7 @@ namespace Gvz.Laboratory.UserService.Contracts
 {
     public record GetUsersForPageResponse(
         Guid Id,
-        UserRole Role,
+        string Role,
         string Surname,
         string UserName,
         string Patronymic,

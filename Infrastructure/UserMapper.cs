@@ -6,14 +6,14 @@ namespace Gvz.Laboratory.UserService.Infrastructure
 {
     public partial class UserMapper : IUserMapper
     {
-        public UserDto? MapTo(UserModel p1)
+        public UserDto? MapTo(UserModel user)
         {
-            return p1 == null ? null : new UserDto()
+            return user == null ? null : new UserDto()
             {
-                Id = p1.Id,
-                Surname = p1.Surname,
-                UserName = p1.UserName,
-                Patronymic = p1.Patronymic
+                Id = user.Id,
+                Surname = user.Surname,
+                UserName = user.UserName,
+                Patronymic = user.Patronymic
             };
         }
     }

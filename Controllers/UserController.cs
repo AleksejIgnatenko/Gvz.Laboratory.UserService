@@ -46,19 +46,19 @@ namespace Gvz.Laboratory.UserService.Controllers
 
         [HttpGet]
         [Route("getUsersForPage")]
-        public async Task<ActionResult> GetUsersForPageAsync(int page)
+        public async Task<ActionResult> GetUsersForPageAsync(int pageNumber)
         {
-            var (users, countUser) = await _userService.GetUsersForPageAsync(page);
-            Console.WriteLine(page);
+            var (users, numberUsers) = await _userService.GetUsersForPageAsync(pageNumber);
+
             var response = users.Select(u => new GetUsersForPageResponse(
                 u.Id,
-                u.Role,
+                u.Role.ToString(),
                 u.Surname,
                 u.UserName,
                 u.Patronymic,
                 u.Email)).ToList();
 
-            var responseWrapper = new GetUsersForPageResponseWrapper(response, countUser);
+            var responseWrapper = new GetUsersForPageResponseWrapper(response, numberUsers);
 
             return Ok(responseWrapper);
         }

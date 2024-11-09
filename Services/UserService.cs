@@ -34,7 +34,7 @@ namespace Gvz.Laboratory.UserService.Services
             await _userRepository.CreateUserAsync(user);
 
             var userDto = _userMapper.MapTo(user) ?? throw new Exception();
-            await _userKafkaProducer.SendUserToKafka(userDto, "users-topic");
+            await _userKafkaProducer.SendUserToKafka(userDto, "add-user-topic");
 
             var token = _jwtProvider.GenerateToken(user);
 
@@ -58,9 +58,9 @@ namespace Gvz.Laboratory.UserService.Services
             return token;
         }
 
-        public async Task<(List<UserModel> users, int countUser)> GetUsersForPageAsync(int page)
+        public async Task<(List<UserModel> users, int numberUsers)> GetUsersForPageAsync(int pageNumber)
         {
-            return await _userRepository.GetUsersForPageAsync(page);
+            return await _userRepository.GetUsersForPageAsync(pageNumber);
         }
 
         public async Task<List<UserModel>> GetAllUsersAsync()
@@ -68,7 +68,7 @@ namespace Gvz.Laboratory.UserService.Services
             return await _userRepository.GetAllUsersAsync();
         }
 
-        public async Task UpdateUserAsync(Guid id, string surname, string name, string patronymic)
+        public async Task<Guid> UpdateUserAsync(Guid id, string surname, string name, string patronymic)
         {
             var (errors, user) = UserModel.Create(id, surname, name, patronymic);
             errors = errors.Where(x => x.Key.Equals("Surname") || x.Key.Equals("Name") || x.Key.Equals("Patronymic"))
@@ -79,7 +79,13 @@ namespace Gvz.Laboratory.UserService.Services
                 throw new UserValidationException(errors);
             }
 
+            var userDto = _userMapper.MapTo(user) ?? throw new Exception();
+
             await _userRepository.UpdateUserAsync(user);
+
+            await _userKafkaProducer.SendUserToKafka(userDto, "update-user-topic");
+
+            return id;
         }
     }
 }

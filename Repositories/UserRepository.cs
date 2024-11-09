@@ -46,16 +46,16 @@ namespace Gvz.Laboratory.UserService.Repositories
             }
         }
 
-        public async Task<(List<UserModel> users, int countUser)> GetUsersForPageAsync(int page)
+        public async Task<(List<UserModel> users, int numberUsers)> GetUsersForPageAsync(int pageNumber)
         {
             var userEntities = await _context.Users
                 .AsNoTracking()
                 .OrderByDescending(u => u.DateCreate)
-                .Skip(page * 10)
+                .Skip(pageNumber * 10)
                 .Take(10)
                 .ToListAsync();
 
-            var countUser = await _context.Users.CountAsync();
+            var numberUsers = await _context.Users.CountAsync();
 
             var users = userEntities.Select(u => UserModel.Create(u.Id,
                                             u.Role,
@@ -66,7 +66,7 @@ namespace Gvz.Laboratory.UserService.Repositories
                                             u.Password,
                                             false).user).ToList();
 
-            return (users, countUser);
+            return (users, numberUsers);
         }
 
         public async Task<List<UserModel>> GetAllUsersAsync()

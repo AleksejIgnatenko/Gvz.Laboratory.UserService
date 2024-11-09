@@ -2,6 +2,6 @@
 {
     public record GetUsersForPageResponseWrapper(
         List<GetUsersForPageResponse> Users,
-        int CountUser
+        int NumberUsers
     );
 }

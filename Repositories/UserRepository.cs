@@ -93,7 +93,7 @@ namespace Gvz.Laboratory.UserService.Repositories
             var userEntity = await _context.Users
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Email == email)
-                ?? throw new UsersRepositoryException("Пользователя с такой почтой не существует");
+                ?? throw new AuthenticationFailedException("Неверный логин или пароль.");
 
             var user = UserModel.Create(userEntity.Id,
                 userEntity.Role,

@@ -27,6 +27,16 @@ public class ExceptionHandlerMiddleware
             var result = JsonSerializer.Serialize(new { error = ex.Errors });
             await context.Response.WriteAsync(result);
         }
+        catch (AuthenticationFailedException ex)
+        {
+            var statusCode = StatusCodes.Status401Unauthorized;
+
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/json";
+
+            var result = JsonSerializer.Serialize(new { error = ex.Message });
+            await context.Response.WriteAsync(result);
+        }
         catch (UsersRepositoryException ex)
         {
             var statusCode = StatusCodes.Status409Conflict;

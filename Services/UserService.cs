@@ -50,7 +50,7 @@ namespace Gvz.Laboratory.UserService.Services
 
             if (!isVerify)
             {
-                throw new UnauthorizedAccessException("Неправильный пароль");
+                throw new AuthenticationFailedException("Неверный логин или пароль.");
             }
 
             var token = _jwtProvider.GenerateToken(user);

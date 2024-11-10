@@ -23,10 +23,14 @@ namespace Gvz.Laboratory.UserService.Models
             Patronymic = patronymic;
         }
 
-        private UserModel(Guid id, UserRole role, string surname, string userName,
-            string patronymic, string email, string password) : this(id, surname, userName, patronymic)
+        private UserModel(Guid id, UserRole role, string surname, string userName, string patronymic) : this(id, surname, userName, patronymic)
         {
             Role = role;
+        }
+
+        private UserModel(Guid id, UserRole role, string surname, string userName,
+            string patronymic, string email, string password) : this(id, role, surname, userName, patronymic)
+        {
             Email = email;
             Password = password;
         }
@@ -37,12 +41,12 @@ namespace Gvz.Laboratory.UserService.Models
             RepeatPassword = repeatPassword;
         }
 
-        public static (Dictionary<string, string> errors, UserModel user) Create(Guid id, string surname, string userName, string patronymic,
+        public static (Dictionary<string, string> errors, UserModel user) Create(Guid id, UserRole role, string surname, string userName, string patronymic,
             bool useValidation = true)
         {
             Dictionary<string, string> errors = new Dictionary<string, string>();
 
-            UserModel user = new UserModel(id, surname, userName, patronymic);
+            UserModel user = new UserModel(id, role, surname, userName, patronymic);
             if (!useValidation) { return (errors, user); }
 
             UserValidation userValidation = new UserValidation();

@@ -1,8 +1,12 @@
-﻿namespace Gvz.Laboratory.UserService.Contracts
+﻿using Gvz.Laboratory.UserService.Enums;
+
+namespace Gvz.Laboratory.UserService.Contracts
 {
     public record UpdateUserRequest(
+        Guid Id,
+        string Role,
         string Surname,
-        string Name,
+        string UserName,
         string Patronymic
         );
 }

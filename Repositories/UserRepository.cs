@@ -113,6 +113,7 @@ namespace Gvz.Laboratory.UserService.Repositories
 
             if (userEntity == null) { throw new UsersRepositoryException("Пользователя не найден"); }
 
+            userEntity.Role = userModel.Role;
             userEntity.Surname = userModel.Surname;
             userEntity.UserName = userModel.UserName;
             userEntity.Patronymic = userModel.Patronymic;

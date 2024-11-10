@@ -68,9 +68,9 @@ namespace Gvz.Laboratory.UserService.Services
             return await _userRepository.GetAllUsersAsync();
         }
 
-        public async Task<Guid> UpdateUserAsync(Guid id, string surname, string name, string patronymic)
+        public async Task<Guid> UpdateUserAsync(Guid id, UserRole role, string surname, string name, string patronymic)
         {
-            var (errors, user) = UserModel.Create(id, surname, name, patronymic);
+            var (errors, user) = UserModel.Create(id, role, surname, name, patronymic);
             errors = errors.Where(x => x.Key.Equals("Surname") || x.Key.Equals("Name") || x.Key.Equals("Patronymic"))
                            .ToDictionary(x => x.Key, x => x.Value);
 

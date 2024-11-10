@@ -96,11 +96,28 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpPut]
-        [Route("updateUser/{id:guid}")]
+        [Route("{id:guid}")]
         public async Task<ActionResult> UpdateUserAsync(Guid id, [FromBody] UpdateUserRequest updateUserRequest)
         {
-            await _userService.UpdateUserAsync(id, updateUserRequest.Surname, updateUserRequest.Name, updateUserRequest.Patronymic);
-            return Ok();
+            if (Enum.TryParse<UserRole>(updateUserRequest.Role, true, out var role))
+            {
+                int roleValue = (int)role;
+                roleValue--;
+
+                if (Enum.IsDefined(typeof(UserRole), roleValue))
+                {
+                    UserRole updatedRole = (UserRole)roleValue;
+
+                    Console.WriteLine(updatedRole);
+                    await _userService.UpdateUserAsync(id, updatedRole, updateUserRequest.Surname, updateUserRequest.UserName, updateUserRequest.Patronymic);
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest("Ошибка преобразования роли.");
+                }
+            }
+            return BadRequest("Неверная роль пользователя.");
         }
     }
 }

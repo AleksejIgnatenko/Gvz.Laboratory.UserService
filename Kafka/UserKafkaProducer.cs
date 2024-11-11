@@ -14,7 +14,7 @@ namespace Gvz.Laboratory.UserService.Kafka
             _producer = producer;
         }
 
-        public async Task SendUserToKafka(UserDto user, string topic)
+        public async Task SendUserToKafkaAsync(UserDto user, string topic)
         {
             var serializedUser = JsonSerializer.Serialize(user);
             await _producer.ProduceAsync(topic, new Message<Null, string> { Value = serializedUser });

@@ -4,6 +4,6 @@ namespace Gvz.Laboratory.UserService.Abstractions
 {
     public interface IUserKafkaProducer
     {
-        Task SendUserToKafka(UserDto user, string topic);
+        Task SendUserToKafkaAsync(UserDto user, string topic);
     }
 }

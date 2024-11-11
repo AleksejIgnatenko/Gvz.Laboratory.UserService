@@ -34,7 +34,7 @@ namespace Gvz.Laboratory.UserService.Services
             await _userRepository.CreateUserAsync(user);
 
             var userDto = _userMapper.MapTo(user) ?? throw new Exception();
-            await _userKafkaProducer.SendUserToKafka(userDto, "add-user-topic");
+            await _userKafkaProducer.SendUserToKafkaAsync(userDto, "add-user-topic");
 
             var token = _jwtProvider.GenerateToken(user);
 
@@ -83,7 +83,7 @@ namespace Gvz.Laboratory.UserService.Services
 
             await _userRepository.UpdateUserAsync(user);
 
-            await _userKafkaProducer.SendUserToKafka(userDto, "update-user-topic");
+            await _userKafkaProducer.SendUserToKafkaAsync(userDto, "update-user-topic");
 
             return id;
         }

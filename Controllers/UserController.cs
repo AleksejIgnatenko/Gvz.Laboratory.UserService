@@ -25,7 +25,7 @@ namespace Gvz.Laboratory.UserService.Controllers
         public async Task<ActionResult> UserRegistrationAsync([FromBody] UserRegistrationRequest userRegistrationRequest)
         {
             var token = await _userService.CreateUserAsync(Guid.NewGuid(),
-                                                            UserRole.User,
+                                                            UserRole.Admin,
                                                             userRegistrationRequest.Surname,
                                                             userRegistrationRequest.UserName,
                                                             userRegistrationRequest.Patronymic,
@@ -46,6 +46,7 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         [Route("getUsersForPage")]
         public async Task<ActionResult> GetUsersForPageAsync(int pageNumber)
         {
@@ -65,6 +66,7 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Manager")]
         [Route("getAllUsers")]
         public async Task<ActionResult<List<UserModel>>> GetAllUsersAsync()
         {
@@ -96,6 +98,7 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpPut]
+        [Authorize(Roles = "Admin,Manager")]
         [Route("{id:guid}")]
         public async Task<ActionResult> UpdateUserAsync(Guid id, [FromBody] UpdateUserRequest updateUserRequest)
         {

@@ -1,4 +1,5 @@
-﻿using Gvz.Laboratory.UserService.Models;
+﻿using Gvz.Laboratory.UserService.Entities;
+using Gvz.Laboratory.UserService.Models;
 
 namespace Gvz.Laboratory.UserService.Abstractions
 {
@@ -8,6 +9,7 @@ namespace Gvz.Laboratory.UserService.Abstractions
         Task<(List<UserModel> users, int numberUsers)> GetUsersForPageAsync(int pageNumber);
         Task<List<UserModel>> GetAllUsersAsync();
         Task<UserModel> GetUserByEmailAsync(string email);
+        Task<UserEntity?> GetUserEntityByIdAsync(Guid userId);
         Task<Guid> UpdateUserAsync(UserModel userModel);
     }
 }

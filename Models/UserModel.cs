@@ -41,6 +41,10 @@ namespace Gvz.Laboratory.UserService.Models
             RepeatPassword = repeatPassword;
         }
 
+        public UserModel()
+        {
+        }
+
         public static (Dictionary<string, string> errors, UserModel user) Create(Guid id, UserRole role, string surname, string userName, string patronymic,
             bool useValidation = true)
         {

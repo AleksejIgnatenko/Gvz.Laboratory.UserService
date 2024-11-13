@@ -37,7 +37,7 @@ public class ExceptionHandlerMiddleware
             var result = JsonSerializer.Serialize(new { error = ex.Message });
             await context.Response.WriteAsync(result);
         }
-        catch (UsersRepositoryException ex)
+        catch (RepositoryException ex)
         {
             var statusCode = StatusCodes.Status409Conflict;
 

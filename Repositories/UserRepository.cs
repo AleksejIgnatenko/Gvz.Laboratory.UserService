@@ -24,7 +24,7 @@ namespace Gvz.Laboratory.UserService.Repositories
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email.Equals(userModel.Email));
 
-            if (existingUser != null) { throw new UsersRepositoryException("Пользователь с такой почтой уже есть"); }
+            if (existingUser != null) { throw new RepositoryException("Пользователь с такой почтой уже есть"); }
             else
             {
                 UserEntity userEntity = new UserEntity
@@ -107,11 +107,16 @@ namespace Gvz.Laboratory.UserService.Repositories
             return user;
         }
 
+        public async Task<UserEntity?> GetUserEntityByIdAsync(Guid userId)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
         public async Task<Guid> UpdateUserAsync(UserModel userModel)
         {
             var userEntity = await _context.Users.FirstOrDefaultAsync(u => u.Id == userModel.Id);
 
-            if (userEntity == null) { throw new UsersRepositoryException("Пользователя не найден"); }
+            if (userEntity == null) { throw new RepositoryException("Пользователя не найден"); }
 
             userEntity.Role = userModel.Role;
             userEntity.Surname = userModel.Surname;

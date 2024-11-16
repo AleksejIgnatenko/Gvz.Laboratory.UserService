@@ -14,10 +14,12 @@ namespace Gvz.Laboratory.UserService.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IJwtProvider _jwtProvider;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IJwtProvider jwtProvider)
         {
             _userService = userService;
+            _jwtProvider = jwtProvider;
         }
 
         [HttpPost]
@@ -52,7 +54,7 @@ namespace Gvz.Laboratory.UserService.Controllers
         {
             var (users, numberUsers) = await _userService.GetUsersForPageAsync(pageNumber);
 
-            var response = users.Select(u => new GetUsersForPageResponse(
+            var response = users.Select(u => new GetUsersResponse(
                 u.Id,
                 u.Role.ToString(),
                 u.Surname,
@@ -97,6 +99,28 @@ namespace Gvz.Laboratory.UserService.Controllers
             return Ok();
         }
 
+        [HttpGet]
+        [Authorize]
+        [Route("getUser")]
+        public async Task<ActionResult> GetUserAsync()
+        {
+            var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+            var userId = _jwtProvider.GetUserIdFromToken(token);
+
+            var user = await  _userService.GetUserByIdAsync(userId);
+
+            var response = new GetUsersResponse(
+                            user.Id,
+                            user.Role.ToString(),
+                            user.Surname,
+                            user.UserName,
+                            user.Patronymic,
+                            user.Email);
+
+            return Ok(response);
+        }
+
         [HttpPut]
         [Authorize(Roles = "Admin,Manager")]
         [Route("{id:guid}")]
@@ -111,7 +135,6 @@ namespace Gvz.Laboratory.UserService.Controllers
                 {
                     UserRole updatedRole = (UserRole)roleValue;
 
-                    Console.WriteLine(updatedRole);
                     await _userService.UpdateUserAsync(id, updatedRole, updateUserRequest.Surname, updateUserRequest.UserName, updateUserRequest.Patronymic);
                     return Ok();
                 }
@@ -121,6 +144,16 @@ namespace Gvz.Laboratory.UserService.Controllers
                 }
             }
             return BadRequest("Неверная роль пользователя.");
+        }
+
+        [HttpPut]
+        [Authorize]
+        [Route("updateUserDetails")]
+        public async Task<ActionResult> UpdateUserDetailsAsync([FromBody] UpdateUserDetailsRequest updateUserDetails)
+        {
+            var userId = await _userService.UpdateUserDetailsAsync(updateUserDetails.Id, updateUserDetails.Surname, updateUserDetails.UserName, updateUserDetails.Patronymic);
+
+            return Ok();
         }
     }
 }

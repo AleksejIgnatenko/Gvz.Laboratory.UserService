@@ -2,7 +2,7 @@
 
 namespace Gvz.Laboratory.UserService.Contracts
 {
-    public record GetUsersForPageResponse(
+    public record GetUsersResponse(
         Guid Id,
         string Role,
         string Surname,

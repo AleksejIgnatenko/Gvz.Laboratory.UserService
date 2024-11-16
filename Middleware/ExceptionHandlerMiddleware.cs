@@ -47,6 +47,16 @@ public class ExceptionHandlerMiddleware
             var result = JsonSerializer.Serialize(new { error = ex.Message });
             await context.Response.WriteAsync(result);
         }
+        catch (InvalidOperationException ex)
+        {
+            var statusCode = StatusCodes.Status404NotFound;
+
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/json";
+
+            var result = JsonSerializer.Serialize(new { error = ex.Message });
+            await context.Response.WriteAsync(result);
+        }
         catch (Exception ex)
         {
             Log.Error(ex.Message);

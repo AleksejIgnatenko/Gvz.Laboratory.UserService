@@ -2,6 +2,7 @@
 using Gvz.Laboratory.UserService.Enums;
 using Gvz.Laboratory.UserService.Exceptions;
 using Gvz.Laboratory.UserService.Models;
+using System.Data;
 
 namespace Gvz.Laboratory.UserService.Services
 {
@@ -68,10 +69,35 @@ namespace Gvz.Laboratory.UserService.Services
             return await _userRepository.GetAllUsersAsync();
         }
 
+        public async Task<UserModel> GetUserByIdAsync(Guid id)
+        {
+            return await _userRepository.GetUserByIdAsync(id);
+        }
+
         public async Task<Guid> UpdateUserAsync(Guid id, UserRole role, string surname, string name, string patronymic)
         {
             var (errors, user) = UserModel.Create(id, role, surname, name, patronymic);
-            errors = errors.Where(x => x.Key.Equals("Surname") || x.Key.Equals("Name") || x.Key.Equals("Patronymic"))
+            errors = errors.Where(x => x.Key.Equals("Surname") || x.Key.Equals("UserName") || x.Key.Equals("Patronymic"))
+                           .ToDictionary(x => x.Key, x => x.Value);
+
+            if (errors.Count > 0)
+            {
+                throw new UserValidationException(errors);
+            }
+
+            var userDto = _userMapper.MapTo(user) ?? throw new Exception();
+
+            await _userRepository.UpdateUserAsync(user);
+
+            await _userKafkaProducer.SendUserToKafkaAsync(userDto, "update-user-topic");
+
+            return id;
+        }
+
+        public async Task<Guid> UpdateUserDetailsAsync(Guid id, string surname, string name, string patronymic)
+        {
+            var (errors, user) = UserModel.Create(id, surname, name, patronymic);
+            errors = errors.Where(x => x.Key.Equals("Surname") || x.Key.Equals("UserName") || x.Key.Equals("Patronymic"))
                            .ToDictionary(x => x.Key, x => x.Value);
 
             if (errors.Count > 0)

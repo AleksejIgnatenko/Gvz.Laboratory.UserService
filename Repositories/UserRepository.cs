@@ -107,6 +107,24 @@ namespace Gvz.Laboratory.UserService.Repositories
             return user;
         }
 
+        public async Task<UserModel> GetUserByIdAsync(Guid id)
+        {
+            var userEntity = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id)
+                ?? throw new InvalidOperationException("Пользователь не найден.");
+
+            var user = UserModel.Create(userEntity.Id,
+                userEntity.Role,
+                userEntity.Surname,
+                userEntity.UserName,
+                userEntity.Patronymic,
+                userEntity.Email,
+                userEntity.Password,
+                false).user;
+
+            return user;
+        }
+
         public async Task<UserEntity?> GetUserEntityByIdAsync(Guid userId)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -114,11 +132,25 @@ namespace Gvz.Laboratory.UserService.Repositories
 
         public async Task<Guid> UpdateUserAsync(UserModel userModel)
         {
-            var userEntity = await _context.Users.FirstOrDefaultAsync(u => u.Id == userModel.Id);
+            var userEntity = await _context.Users.FirstOrDefaultAsync(u => u.Id == userModel.Id)
+                ?? throw new RepositoryException("Пользователя не найден.");
 
-            if (userEntity == null) { throw new RepositoryException("Пользователя не найден"); }
 
             userEntity.Role = userModel.Role;
+            userEntity.Surname = userModel.Surname;
+            userEntity.UserName = userModel.UserName;
+            userEntity.Patronymic = userModel.Patronymic;
+
+            await _context.SaveChangesAsync();
+
+            return userModel.Id;
+        }
+
+        public async Task<Guid> UpdateUserDetailsAsync(UserModel userModel)
+        {
+            var userEntity = await _context.Users.FirstOrDefaultAsync(u => u.Id == userModel.Id)
+                ?? throw new RepositoryException("Пользователя не найден."); ;
+
             userEntity.Surname = userModel.Surname;
             userEntity.UserName = userModel.UserName;
             userEntity.Patronymic = userModel.Patronymic;

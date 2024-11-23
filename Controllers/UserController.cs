@@ -121,6 +121,36 @@ namespace Gvz.Laboratory.UserService.Controllers
             return Ok(response);
         }
 
+        [HttpGet]
+        [Route("exportUsersToExcel")]
+        [Authorize]
+        public async Task<ActionResult> ExportUsersToExcelAsync()
+        {
+            var stream = await _userService.ExportUsersToExcelAsync();
+            var fileName = "Users.xlsx";
+
+            return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("searchUsers")]
+        public async Task<ActionResult> SearchUsersAsync(string searchQuery, int pageNumber)
+        {
+            var (users, numberUsers) = await _userService.SearchUsersAsync(searchQuery, pageNumber);
+            var response = users.Select(u => new GetUsersResponse(
+                u.Id,
+                u.Role.ToString(),
+                u.Surname,
+                u.UserName,
+                u.Patronymic,
+                u.Email)).ToList();
+
+            var responseWrapper = new GetUsersForPageResponseWrapper(response, numberUsers);
+
+            return Ok(responseWrapper);
+        }
+
         [HttpPut]
         [Authorize(Roles = "Admin,Manager")]
         [Route("{id:guid}")]

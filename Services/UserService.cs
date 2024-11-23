@@ -2,6 +2,7 @@
 using Gvz.Laboratory.UserService.Enums;
 using Gvz.Laboratory.UserService.Exceptions;
 using Gvz.Laboratory.UserService.Models;
+using OfficeOpenXml;
 using System.Data;
 
 namespace Gvz.Laboratory.UserService.Services
@@ -92,6 +93,46 @@ namespace Gvz.Laboratory.UserService.Services
             await _userKafkaProducer.SendUserToKafkaAsync(userDto, "update-user-topic");
 
             return id;
+        }
+
+        public async Task<(List<UserModel> users, int numberUsers)> SearchUsersAsync(string searchQuery, int pageNumber)
+        {
+            return await _userRepository.SearchUsersAsync(searchQuery, pageNumber);
+        }
+
+        public async Task<MemoryStream> ExportUsersToExcelAsync()
+        {
+            var manufacturers = await _userRepository.GetAllUsersAsync();
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Manufacturers");
+
+                worksheet.Cells[1, 1].Value = "Id";
+                worksheet.Cells[1, 2].Value = "Роль";
+                worksheet.Cells[1, 3].Value = "Фамилия";
+                worksheet.Cells[1, 4].Value = "Имя";
+                worksheet.Cells[1, 5].Value = "Отчество";
+                worksheet.Cells[1, 6].Value = "Почта";
+
+                for (int i = 0; i < manufacturers.Count; i++)
+                {
+                    worksheet.Cells[i + 2, 1].Value = manufacturers[i].Id;
+                    worksheet.Cells[i + 2, 2].Value = manufacturers[i].Role;
+                    worksheet.Cells[i + 2, 3].Value = manufacturers[i].Surname;
+                    worksheet.Cells[i + 2, 4].Value = manufacturers[i].UserName;
+                    worksheet.Cells[i + 2, 5].Value = manufacturers[i].Patronymic;
+                    worksheet.Cells[i + 2, 6].Value = manufacturers[i].Email;
+                }
+
+                worksheet.Cells.AutoFitColumns();
+
+                var stream = new MemoryStream();
+                await package.SaveAsAsync(stream);
+
+                stream.Position = 0; // Сбрасываем поток
+                return stream;
+            }
         }
 
         public async Task<Guid> UpdateUserDetailsAsync(Guid id, string surname, string name, string patronymic)

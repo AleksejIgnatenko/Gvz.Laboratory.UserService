@@ -11,6 +11,7 @@ namespace Gvz.Laboratory.UserService.Abstractions
         Task<UserModel> GetUserByEmailAsync(string email);
         Task<UserEntity?> GetUserEntityByIdAsync(Guid userId);
         Task<UserModel> GetUserByIdAsync(Guid id);
+        Task<(List<UserModel> users, int numberUsers)> SearchUsersAsync(string searchQuery, int pageNumber);
         Task<Guid> UpdateUserAsync(UserModel userModel);
         Task<Guid> UpdateUserDetailsAsync(UserModel userModel);
     }

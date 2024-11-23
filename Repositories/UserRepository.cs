@@ -130,6 +130,42 @@ namespace Gvz.Laboratory.UserService.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         }
 
+        public async Task<(List<UserModel> users, int numberUsers)> SearchUsersAsync(string searchQuery, int pageNumber)
+        {
+            var userEntities = await _context.Users
+                    .AsNoTracking()
+                    .Where(u => 
+                        u.Surname.ToLower().Contains(searchQuery.ToLower()) ||
+                        u.UserName.ToLower().Contains(searchQuery.ToLower()) ||
+                        u.Patronymic.ToLower().Contains(searchQuery.ToLower()) ||
+                        u.Email.ToLower().Contains(searchQuery.ToLower())
+                    )
+                    .OrderByDescending(u => u.DateCreate)
+                    .Skip(pageNumber * 20)
+                    .Take(20)
+                    .ToListAsync();
+
+
+            var numberUsers = await _context.Users
+                    .AsNoTracking()
+                    .CountAsync(u =>
+                        u.Surname.ToLower().Contains(searchQuery.ToLower()) ||
+                        u.UserName.ToLower().Contains(searchQuery.ToLower()) ||
+                        u.Patronymic.ToLower().Contains(searchQuery.ToLower()) ||
+                        u.Email.ToLower().Contains(searchQuery.ToLower()));
+
+            var users = userEntities.Select(u => UserModel.Create(u.Id,
+                                            u.Role,
+                                            u.Surname,
+                                            u.UserName,
+                                            u.Patronymic,
+                                            u.Email,
+                                            u.Password,
+                                            false).user).ToList();
+
+            return (users, numberUsers);
+        }
+
         public async Task<Guid> UpdateUserAsync(UserModel userModel)
         {
             var userEntity = await _context.Users.FirstOrDefaultAsync(u => u.Id == userModel.Id)

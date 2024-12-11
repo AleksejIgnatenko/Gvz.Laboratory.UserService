@@ -48,8 +48,8 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Manager")]
         [Route("getUsersForPage")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult> GetUsersForPageAsync(int pageNumber)
         {
             var (users, numberUsers) = await _userService.GetUsersForPageAsync(pageNumber);
@@ -68,40 +68,40 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Manager")]
         [Route("getAllUsers")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult<List<UserModel>>> GetAllUsersAsync()
         {
             return Ok(await _userService.GetAllUsersAsync());
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
         [Route("isAdmin")]
+        [Authorize(Roles = "Admin")]
         public ActionResult IsAdmin()
         {
             return Ok();
         }
 
         [HttpGet]
-        [Authorize(Roles = "Manager")]
         [Route("isManager")]
+        [Authorize(Roles = "Manager")]
         public ActionResult IsManager()
         {
             return Ok();
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Manager")]
         [Route("isAdminOrManager")]
+        [Authorize(Roles = "Admin,Manager")]
         public ActionResult IsAdminOrManager()
         {
             return Ok();
         }
 
         [HttpGet]
-        [Authorize]
         [Route("getUser")]
+        [Authorize]
         public async Task<ActionResult> GetUserAsync()
         {
             var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
@@ -123,7 +123,7 @@ namespace Gvz.Laboratory.UserService.Controllers
 
         [HttpGet]
         [Route("exportUsersToExcel")]
-        [Authorize]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult> ExportUsersToExcelAsync()
         {
             var stream = await _userService.ExportUsersToExcelAsync();
@@ -133,8 +133,8 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         [Route("searchUsers")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult> SearchUsersAsync(string searchQuery, int pageNumber)
         {
             var (users, numberUsers) = await _userService.SearchUsersAsync(searchQuery, pageNumber);
@@ -152,8 +152,8 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpPut]
-        [Authorize(Roles = "Admin,Manager")]
         [Route("{id:guid}")]
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult> UpdateUserAsync(Guid id, [FromBody] UpdateUserRequest updateUserRequest)
         {
             if (Enum.TryParse<UserRole>(updateUserRequest.Role, true, out var role))
@@ -177,8 +177,8 @@ namespace Gvz.Laboratory.UserService.Controllers
         }
 
         [HttpPut]
-        [Authorize]
         [Route("updateUserDetails")]
+        [Authorize]
         public async Task<ActionResult> UpdateUserDetailsAsync([FromBody] UpdateUserDetailsRequest updateUserDetails)
         {
             var userId = await _userService.UpdateUserDetailsAsync(updateUserDetails.Id, updateUserDetails.Surname, updateUserDetails.UserName, updateUserDetails.Patronymic);

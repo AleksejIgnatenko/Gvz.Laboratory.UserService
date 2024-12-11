@@ -14,9 +14,10 @@ namespace Gvz.Laboratory.UserService.Controllers
         {
             _partyService = partyService;
         }
+
         [HttpGet]
-        [Authorize]
         [Route("getUserPartiesForPage")]
+        [Authorize]
         public async Task<ActionResult> GetUserPartiesForPageAsync(Guid userId, int pageNumber)
         {
             var (parties, numberParties) = await _partyService.GetUserPartiesForPageAsync(userId, pageNumber);
